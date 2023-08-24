@@ -41,6 +41,20 @@ class TooltipViewModel : ViewModel() {
     )
     val uiState: StateFlow<UIState> = _uiState
 
+    fun resetUIState() {
+        _uiState.value = UIState(
+            targetElement = "Button 1",
+            textSize = 18.sp,
+            padding = 0.dp,
+            tooltipText = "Tooltip text!",
+            textColor = Color.White,
+            backgroundColor = Color.Black,
+            cornerRadius = 8.dp,
+            tooltipWidth = 0.dp,
+            arrowHeight = 10.dp,
+            arrowWidth = 10.dp
+        )
+    }
     fun onEvent(event: TooltipConfigScreenEvent) {
         when (event) {
             is TooltipConfigScreenEvent.onTargetElementChanged -> {
