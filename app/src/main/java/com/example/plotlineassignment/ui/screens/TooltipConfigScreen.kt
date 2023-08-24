@@ -2,6 +2,7 @@
 
 package com.example.plotlineassignment.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,10 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -29,9 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,20 +39,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.example.plotlineassignment.Destinations
+import com.example.plotlineassignment.TooltipConfigScreenEvent
+import com.example.plotlineassignment.ui.viewmodels.TooltipViewModel
 import com.example.plotlineassignment.ui.theme.GrayBackgroundColor
 
 
 val lightGrayColor = Color(0xFFd9d9d9)
 
 @Composable
-@Preview
-fun TooltipConfigScreen() {
+fun TooltipConfigScreen(viewModel: TooltipViewModel, navController: NavController) {
+//    val ctx = LocalContext.current
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -66,34 +69,116 @@ fun TooltipConfigScreen() {
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            TargetElementField()
+            DropdownSelectionField(initialSelectedItem = uiState.targetElement,
+                title = "Target Element",
+                id = "target-element",
+                modifier = Modifier.fillMaxWidth(),
+                selectionsList = viewModel.targetElements,
+                onItemSelect = { targetElement ->
+                    viewModel.onEvent(TooltipConfigScreenEvent.onTargetElementChanged(targetElement as String))
+                })
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(28.dp)
             ) {
-                TooltipStylingField(heading = "Text Size", modifier = Modifier.weight(1f))
-                TooltipStylingField(heading = "Padding", modifier = Modifier.weight(1f))
+                DropdownSelectionField(initialSelectedItem = uiState.textSize.toString(),
+                    title = "Text Size",
+                    id = "text-size",
+                    modifier = Modifier.weight(1f),
+                    selectionsList = viewModel.textSizeRange.map { it.toString() },
+                    onItemSelect = { selectedSize ->
+                        viewModel.onEvent(TooltipConfigScreenEvent.onTextSizeChanged(selectedSize as String))
+                    })
+                DropdownSelectionField(initialSelectedItem = uiState.padding.toString(),
+                    title = "Padding",
+                    id = "padding",
+                    modifier = Modifier.weight(1f),
+                    selectionsList = viewModel.paddingSizeRange.map { it.toString() },
+                    onItemSelect = { paddingItem ->
+                        viewModel.onEvent(TooltipConfigScreenEvent.onPaddingChanged(paddingItem as String))
+                    })
             }
-            TooltipStylingField(heading = "Tooltip text")
-            TooltipStylingField(heading = "Text Color")
-            TooltipStylingField(heading = "Background Color")
+            TooltipStylingField(onTextValueChanged = { text ->
+                viewModel.onEvent(TooltipConfigScreenEvent.onTooltipTextChanged(text))
+            }, heading = "Tooltip text")
+
+            DropdownSelectionField(initialSelectedItem = viewModel.availableColors[0].first,
+                selectionsList = viewModel.availableColors.map { it.first },
+                availableColors = viewModel.availableColors.map { it.second },
+                title = "Text Color",
+                id = "text-color",
+                modifier = Modifier.fillMaxWidth(),
+                onItemSelect = { selectedTextColor ->
+                    viewModel.onEvent(TooltipConfigScreenEvent.onTextColorChanged(selectedTextColor as Color))
+                })
+            DropdownSelectionField(initialSelectedItem = viewModel.availableColors[0].first,
+                selectionsList = viewModel.availableColors.map { it.first },
+                availableColors = viewModel.availableColors.map { it.second },
+                title = "Background Color",
+                id = "background-color",
+                modifier = Modifier.fillMaxWidth(),
+                onItemSelect = { selectedBackgroundColor ->
+                    viewModel.onEvent(
+                        TooltipConfigScreenEvent.onBackgroundColorChanged(
+                            selectedBackgroundColor as Color
+                        )
+                    )
+                })
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(28.dp)
             ) {
-                TooltipStylingField(heading = "Corner Radius", modifier = Modifier.weight(1f))
-                TooltipStylingField(heading = "Tooltip width", modifier = Modifier.weight(1f))
+                DropdownSelectionField(initialSelectedItem = uiState.cornerRadius.toString(),
+                    selectionsList = viewModel.cornerRadiusRage.map { it.toString() },
+                    id = "corner-radius",
+                    title = "Corner Radius",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = { selectedCornerRadius ->
+                        viewModel.onEvent(
+                            TooltipConfigScreenEvent.onCornerRadiusChanged(
+                                selectedCornerRadius as String
+                            )
+                        )
+                    })
+                DropdownSelectionField(initialSelectedItem = uiState.tooltipWidth.toString(),
+                    selectionsList = viewModel.cornerRadiusRage.map { it.toString() },
+                    id = "tooltip-width",
+                    title = "Tooltip width",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = {})
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(28.dp)
             ) {
-                TooltipStylingField(heading = "Arrow height", modifier = Modifier.weight(1f))
-                TooltipStylingField(heading = "Arrow width", modifier = Modifier.weight(1f))
+                DropdownSelectionField(initialSelectedItem = uiState.arrowHeight.toString(),
+                    selectionsList = viewModel.arrowSizeRange.map { it.toString() },
+                    id = "arrow-height",
+                    title = "Arrow height",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = { selectedArrowHeight ->
+                        viewModel.onEvent(
+                            TooltipConfigScreenEvent.onArrowHeightChanged(
+                                selectedArrowHeight as String
+                            )
+                        )
+                    })
+                DropdownSelectionField(initialSelectedItem = uiState.arrowWidth.toString(),
+                    selectionsList = viewModel.arrowSizeRange.map { it.toString() },
+                    id = "arrow-width",
+                    title = "Arrow Width",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = { selectedArrowWidth ->
+                        viewModel.onEvent(
+                            TooltipConfigScreenEvent.onArrowWidthChanged(
+                                selectedArrowWidth as String
+                            )
+                        )
+                    })
             }
             Spacer(modifier = Modifier.height(12.dp))
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(Destinations.TooltipRenderScreen) },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
@@ -108,7 +193,10 @@ fun TooltipConfigScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TooltipStylingField(heading: String, modifier: Modifier = Modifier.fillMaxWidth()) {
+fun TooltipStylingField(
+    onTextValueChanged: (value: String) -> Unit,
+    heading: String, modifier: Modifier = Modifier.fillMaxWidth()
+) {
     Column(
         modifier = modifier
     ) {
@@ -116,7 +204,6 @@ fun TooltipStylingField(heading: String, modifier: Modifier = Modifier.fillMaxWi
         Text(text = heading)
         Spacer(modifier = Modifier.height(7.dp))
         TextField(
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             shape = RoundedCornerShape(6.dp),
             placeholder = { Text(text = "Input", color = lightGrayColor) },
             colors = TextFieldDefaults.textFieldColors(
@@ -133,34 +220,48 @@ fun TooltipStylingField(heading: String, modifier: Modifier = Modifier.fillMaxWi
                 .border(1.dp, color = lightGrayColor, shape = RoundedCornerShape(6.dp)),
             value = value,
             onValueChange = {
-                value = it.filter { it.isLetter() }
-            }
-        )
+                val text = it.filter { it.isLetter() || it.isWhitespace() }
+                onTextValueChanged(text)
+                value = text
+            })
     }
 }
 
 @Composable
-@Preview
-fun TargetElementField() {
+fun DropdownSelectionField(
+    availableColors: List<Color>? = null,
+    initialSelectedItem: String,
+    onItemSelect: (selectedItem: Any) -> Unit,
+    selectionsList: List<String>,
+    title: String,
+    id: String,
+    modifier: Modifier
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
     ) {
-        Text("Target Element")
+        Text(title)
         Spacer(modifier = Modifier.height(7.dp))
-        TargetElementDropdown()
+        DropdownSelection(availableColors, initialSelectedItem, onItemSelect, selectionsList)
     }
 }
 
 @Composable
-fun TargetElementDropdown() {
-    val elementsList = listOf("Button 1", "Button 2", "Button3", "Button 4", "Button 5")
+fun DropdownSelection(
+    availableColors: List<Color>? = null,
+    initialSelectedItem: String,
+    onItemSelect: (selectedItem: Any) -> Unit,
+    selectionsList: List<String>
+) {
     var isExpanded by remember { mutableStateOf(false) }
     var currentSelectedItem by remember {
-        mutableStateOf(elementsList[0])
+        mutableStateOf(initialSelectedItem)
     }
     Box(
         modifier = Modifier
+            .clickable {
+                isExpanded = true
+            }
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(Color.White)
@@ -172,38 +273,32 @@ fun TargetElementDropdown() {
                 .padding(12.dp)
         ) {
             val (elementNameText, dropDownIcon, dropDownMenu) = createRefs()
-            Text(
-                text = currentSelectedItem,
+            Text(text = currentSelectedItem,
                 color = lightGrayColor,
                 modifier = Modifier.constrainAs(elementNameText) {
                     start.linkTo(parent.start)
                     centerVerticallyTo(parent)
                 })
-            Icon(
-                tint = lightGrayColor,
+            Icon(tint = lightGrayColor,
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "down-arrow",
                 modifier = Modifier
-                    .clickable { isExpanded = true }
                     .constrainAs(dropDownIcon) {
                         centerVerticallyTo(parent)
                         end.linkTo(parent.end)
                     })
 
-            DropdownMenu(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp),
+            DropdownMenu(modifier = Modifier.padding(horizontal = 12.dp),
                 expanded = isExpanded,
-                onDismissRequest = { isExpanded = false }
-            ) {
-                elementsList.forEachIndexed { index, element ->
-                    DropdownMenuItem(
-                        text = { Text(text = element) },
-                        onClick = {
-                            isExpanded = false
-                            currentSelectedItem = element
-                        }
-                    )
+                onDismissRequest = { isExpanded = false }) {
+                selectionsList.forEachIndexed { index, element ->
+                    DropdownMenuItem(text = { Text(text = element) }, onClick = {
+                        isExpanded = false
+                        availableColors?.let {
+                            onItemSelect(it[index])
+                        } ?: onItemSelect(element)
+                        currentSelectedItem = element
+                    })
                 }
             }
         }
