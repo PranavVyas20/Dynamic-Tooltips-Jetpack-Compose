@@ -1,4 +1,4 @@
-package com.example.plotlineassignment
+package com.example.plotlineassignment.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.plotlineassignment.TriangleShape
 import com.example.plotlineassignment.ui.theme.DefaultDark
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.plotlineassignment
+package com.example.plotlineassignment.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
