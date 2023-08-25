@@ -1,4 +1,4 @@
-package com.example.plotlineassignment
+package com.example.plotlineassignment.model
 
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline

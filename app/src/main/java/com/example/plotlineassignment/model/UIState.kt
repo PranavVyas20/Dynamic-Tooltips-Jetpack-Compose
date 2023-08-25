@@ -1,11 +1,13 @@
-package com.example.plotlineassignment
+package com.example.plotlineassignment.model
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import com.example.plotlineassignment.ui.components.TooltipAlignment
 
 data class UIState(
     val targetElement: String,
+    val alignment: TooltipAlignment,
     val textSize: TextUnit,
     val padding: Dp,
     val tooltipText: String,

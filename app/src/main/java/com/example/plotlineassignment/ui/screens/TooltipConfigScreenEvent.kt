@@ -1,9 +1,11 @@
-package com.example.plotlineassignment
+package com.example.plotlineassignment.ui.screens
 
 import androidx.compose.ui.graphics.Color
+import com.example.plotlineassignment.ui.components.TooltipAlignment
 
 sealed class TooltipConfigScreenEvent{
     data class onTargetElementChanged(val targetElement: String): TooltipConfigScreenEvent()
+    data class onTooltipAlignmentChanged(val alignment: TooltipAlignment): TooltipConfigScreenEvent()
     data class onTextSizeChanged(val textSize: String): TooltipConfigScreenEvent()
     data class onPaddingChanged(val padding: String): TooltipConfigScreenEvent()
     data class onTooltipTextChanged(val tooltipText: String): TooltipConfigScreenEvent()

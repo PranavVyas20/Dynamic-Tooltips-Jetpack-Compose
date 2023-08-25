@@ -1,20 +1,22 @@
-package com.example.plotlineassignment.ui.viewmodels
+package com.example.plotlineassignment.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import com.example.plotlineassignment.TooltipConfigScreenEvent
-import com.example.plotlineassignment.UIState
+import com.example.plotlineassignment.ui.screens.TooltipConfigScreenEvent
+import com.example.plotlineassignment.model.UIState
+import com.example.plotlineassignment.ui.components.TooltipAlignment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class TooltipViewModel : ViewModel() {
-    val targetElements = listOf("Button 1", "Button 2", "Button3", "Button 4", "Button 5")
+    val targetElements = listOf("Button 1" to "btn-1", "Button 2" to "btn-2", "Button3" to "btn-3", "Button 4" to "btn-4", "Button 5" to "btn-5")
     var textSizeRange = 1..20
     val paddingSizeRange = 1..20
     val cornerRadiusRage = 1..10
     val arrowSizeRange = 8..18
+    val availableAlignments = listOf("Top", "Bottom", "Start", "End")
     val availableColors =
         listOf(
             "White" to Color.White,
@@ -27,14 +29,15 @@ class TooltipViewModel : ViewModel() {
         )
     private var _uiState: MutableStateFlow<UIState> = MutableStateFlow(
         UIState(
-            targetElement = "Button 1",
-            textSize = 18.sp,
-            padding = 0.dp,
+            alignment = TooltipAlignment.TOP,
+            targetElement = "btn-1",
+            textSize = 14.sp,
+            padding = 8.dp,
             tooltipText = "Tooltip text!",
             textColor = Color.White,
             backgroundColor = Color.Black,
             cornerRadius = 8.dp,
-            tooltipWidth = 0.dp,
+            tooltipWidth = 10.dp,
             arrowHeight = 10.dp,
             arrowWidth = 10.dp
         )
@@ -43,18 +46,20 @@ class TooltipViewModel : ViewModel() {
 
     fun resetUIState() {
         _uiState.value = UIState(
-            targetElement = "Button 1",
-            textSize = 18.sp,
-            padding = 0.dp,
+            targetElement = "btn-1",
+            alignment = TooltipAlignment.TOP,
+            textSize = 14.sp,
+            padding = 8.dp,
             tooltipText = "Tooltip text!",
             textColor = Color.White,
             backgroundColor = Color.Black,
             cornerRadius = 8.dp,
-            tooltipWidth = 0.dp,
+            tooltipWidth = 10.dp,
             arrowHeight = 10.dp,
             arrowWidth = 10.dp
         )
     }
+
     fun onEvent(event: TooltipConfigScreenEvent) {
         when (event) {
             is TooltipConfigScreenEvent.onTargetElementChanged -> {
@@ -114,6 +119,12 @@ class TooltipViewModel : ViewModel() {
             is TooltipConfigScreenEvent.onArrowWidthChanged -> {
                 _uiState.value = _uiState.value.copy(
                     arrowWidth = event.arrowWidth.toFloat().dp
+                )
+            }
+
+            is TooltipConfigScreenEvent.onTooltipAlignmentChanged -> {
+                _uiState.value = _uiState.value.copy(
+                    alignment = event.alignment
                 )
             }
         }
