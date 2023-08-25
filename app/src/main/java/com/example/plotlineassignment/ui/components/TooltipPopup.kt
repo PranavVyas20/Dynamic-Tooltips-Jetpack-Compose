@@ -20,13 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.example.plotlineassignment.TooltipPopupProperties
+import com.example.plotlineassignment.model.TooltipPopupProperties
 import com.example.plotlineassignment.ui.theme.DefaultDark
 import kotlin.math.absoluteValue
 
 @Composable
 fun TooltipPopup(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     tooltipPopupProperties: TooltipPopupProperties,
     anchor: @Composable (tooltipState: TooltipState) -> Unit,
     tooltipState: TooltipState,
@@ -63,17 +63,16 @@ fun TooltipPopup(
     }
 
     Box(modifier = modifier) {
-        Box(modifier = Modifier
-            .onGloballyPositioned { coordinates ->
-                val buttonSize = coordinates.size
-                anchorSpaceStart = coordinates.positionInRoot().x
-                anchorSpaceEnd =
-                    (screenWidth.dp.value - (anchorSpaceStart + buttonSize.width)).absoluteValue
-                Log.d(
-                    "alignment-end",
-                    "button size: ${coordinates.size.width} space end: $anchorSpaceEnd space-start: $anchorSpaceStart"
-                )
-            }) {
+        Box(modifier = Modifier.onGloballyPositioned { coordinates ->
+            val buttonSize = coordinates.size
+            anchorSpaceStart = coordinates.positionInRoot().x
+            anchorSpaceEnd =
+                (screenWidth.dp.value - (anchorSpaceStart + buttonSize.width)).absoluteValue
+            Log.d(
+                "alignment-end",
+                "button size: ${coordinates.size.width} space end: $anchorSpaceEnd space-start: $anchorSpaceStart"
+            )
+        }) {
             anchor(tooltipState)
         }
         if (tooltipState.isVisible) {
@@ -125,21 +124,25 @@ fun TooltipPopup(
                 },
                 offset = offset
             ) {
-                Tooltip(
-                    text = tooltipPopupProperties.tooltipText,
-                    textSize = tooltipPopupProperties.textSize,
-                    textColor = tooltipPopupProperties.textColor,
-                    backgroundColor = tooltipPopupProperties.backgroundColor,
-                    cornerRadius = tooltipPopupProperties.cornerRadius,
-                    arrowHeight = tooltipPopupProperties.arrowHeight,
-                    arrowWidth = tooltipPopupProperties.arrowWidth,
-                    arrowAlignment = arrowAlignment,
-                    modifier = Modifier.onGloballyPositioned { coordinates ->
-                        val height = coordinates.size.height.dp
-                        val width = coordinates.size.width.dp
-                        tooltipContentSize = height to width
+                tooltipPopupProperties.let {
+                    Tooltip(
+                        text = it.tooltipText,
+                        textSize = it.textSize,
+                        textColor = it.textColor,
+                        backgroundColor = it.backgroundColor,
+                        cornerRadius = it.cornerRadius,
+                        padding = it.padding,
+                        arrowHeight = it.arrowHeight,
+                        arrowWidth = it.arrowWidth,
+                        arrowAlignment = arrowAlignment,
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            val height = coordinates.size.height.dp
+                            val width = coordinates.size.width.dp
+                            tooltipContentSize = height to width
 
-                    })
+                        }
+                    )
+                }
             }
         }
     }
@@ -155,6 +158,7 @@ fun TooltipDemo() {
         contentAlignment = Alignment.Center
     ) {
         TooltipPopup(
+            modifier = Modifier,
             tooltipState = rememberTooltipState(initiallyTooltipVisible = false),
             tooltipPopupProperties = TooltipPopupProperties(
                 textColor = Color.White,
@@ -177,7 +181,7 @@ fun TooltipDemo() {
     }
 }
 
-class TooltipState internal constructor(private var initialTooltipVisibility: Boolean) {
+class TooltipState internal constructor(initialTooltipVisibility: Boolean) {
     private var isVisibleState by mutableStateOf(initialTooltipVisibility)
     val isVisible get() = isVisibleState
     fun toggleVisibility() {
@@ -185,11 +189,14 @@ class TooltipState internal constructor(private var initialTooltipVisibility: Bo
     }
 }
 
-enum class TooltipAlignment {
-    TOP,
-    BOTTOM,
-    START,
-    END
+enum class TooltipAlignment(val key: String) {
+    TOP("Top"), BOTTOM("Bottom"), START("Start"), END("End");
+    companion object {
+        fun get(key: String): TooltipAlignment? = TooltipAlignment.values().firstOrNull {
+            it.key == key
+        }
+    }
+
 }
 
 @Composable
