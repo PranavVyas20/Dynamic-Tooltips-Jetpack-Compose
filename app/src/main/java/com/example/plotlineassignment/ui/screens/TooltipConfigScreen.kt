@@ -20,6 +20,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -190,12 +192,14 @@ fun TooltipConfigScreen(viewModel: TooltipViewModel, navController: NavControlle
             }
             Spacer(modifier = Modifier.height(12.dp))
             Button(
+                shape = RoundedCornerShape(size = 4.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
                 onClick = { navController.navigate(Destinations.TooltipRenderScreen) },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
                     "Render Tooltip",
-                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 4.dp)
+                    modifier = Modifier.padding(vertical = 6.dp)
                 )
             }
         }
@@ -268,7 +272,7 @@ fun DropdownSelection(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var textColor by remember {
-        mutableStateOf(lightGrayColor)
+        mutableStateOf(Color.Gray)
     }
     var currentSelectedItem by remember {
         mutableStateOf(initialSelectedItem)
