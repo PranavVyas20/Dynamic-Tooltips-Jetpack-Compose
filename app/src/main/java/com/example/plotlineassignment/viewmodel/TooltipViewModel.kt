@@ -36,7 +36,7 @@ class TooltipViewModel : ViewModel() {
             tooltipText = "Tooltip text!",
             textColor = Color.White,
             backgroundColor = Color.Black,
-            cornerRadius = 8.dp,
+            cornerRadius = 4.dp,
             tooltipWidth = 10.dp,
             arrowHeight = 10.dp,
             arrowWidth = 10.dp
