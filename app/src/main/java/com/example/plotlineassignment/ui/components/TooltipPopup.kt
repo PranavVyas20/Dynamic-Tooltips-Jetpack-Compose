@@ -1,6 +1,5 @@
 package com.example.plotlineassignment.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,10 +67,6 @@ fun TooltipPopup(
             anchorSpaceStart = coordinates.positionInRoot().x
             anchorSpaceEnd =
                 (screenWidth.dp.value - (anchorSpaceStart + buttonSize.width)).absoluteValue
-            Log.d(
-                "alignment-end",
-                "button size: ${coordinates.size.width} space end: $anchorSpaceEnd space-start: $anchorSpaceStart"
-            )
         }) {
             anchor(tooltipState)
         }
@@ -108,14 +103,12 @@ fun TooltipPopup(
 
                     TooltipAlignment.END -> {
                         if (anchorSpaceEnd >= tooltipContentSize.second.value) {
-                            Log.d("alignment-end", "if block")
                             arrowAlignment = TooltipAlignment.START
                             offset = IntOffset(x = tooltipContentSize.second.value.toInt(), y = 0)
                             Alignment.CenterEnd
                         }
                         // If there is not enough space between anchor's end and the screen, try to show the tooltip on the anchor's start
                         else {
-                            Log.d("alignment-end", "else block")
                             arrowAlignment = TooltipAlignment.END
                             offset = IntOffset(x = -tooltipContentSize.second.value.toInt(), y = 0)
                             Alignment.CenterStart
@@ -191,6 +184,7 @@ class TooltipState internal constructor(initialTooltipVisibility: Boolean) {
 
 enum class TooltipAlignment(val key: String) {
     TOP("Top"), BOTTOM("Bottom"), START("Start"), END("End");
+
     companion object {
         fun get(key: String): TooltipAlignment? = TooltipAlignment.values().firstOrNull {
             it.key == key

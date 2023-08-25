@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,13 +46,11 @@ import com.example.plotlineassignment.navigation.Destinations
 import com.example.plotlineassignment.ui.components.TooltipAlignment
 import com.example.plotlineassignment.viewmodel.TooltipViewModel
 import com.example.plotlineassignment.ui.theme.GrayBackgroundColor
+import com.example.plotlineassignment.ui.theme.lightGrayColor
 
-
-val lightGrayColor = Color(0xFFd9d9d9)
 
 @Composable
 fun TooltipConfigScreen(viewModel: TooltipViewModel, navController: NavController) {
-//    val ctx = LocalContext.current
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Surface(
@@ -190,7 +187,7 @@ fun TooltipConfigScreen(viewModel: TooltipViewModel, navController: NavControlle
                         )
                     })
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Button(
                 shape = RoundedCornerShape(size = 4.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
@@ -292,7 +289,7 @@ fun DropdownSelection(
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            val (elementNameText, dropDownIcon, dropDownMenu) = createRefs()
+            val (elementNameText, dropDownIcon) = createRefs()
             Text(
                 text = currentSelectedItem,
                 color = textColor,
