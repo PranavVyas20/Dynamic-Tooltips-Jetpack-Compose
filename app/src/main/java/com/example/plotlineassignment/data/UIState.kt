@@ -1,4 +1,4 @@
-package com.example.plotlineassignment.model
+package com.example.plotlineassignment.data
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -9,6 +9,7 @@ data class UIState(
     val targetElement: String,
     val alignment: TooltipAlignment,
     val textSize: TextUnit,
+    val showImage: Boolean,
     val padding: Dp,
     val tooltipText: String,
     val textColor: Color,

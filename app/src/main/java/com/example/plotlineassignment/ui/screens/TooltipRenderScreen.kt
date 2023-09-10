@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.plotlineassignment.model.TooltipPopupProperties
+import com.example.plotlineassignment.data.TooltipPopupProperties
 import com.example.plotlineassignment.ui.components.TooltipPopup
 import com.example.plotlineassignment.ui.components.rememberTooltipState
 import com.example.plotlineassignment.viewmodel.TooltipViewModel
@@ -33,6 +33,7 @@ fun TooltipRenderScreen(viewModel: TooltipViewModel, navController: NavControlle
         backgroundColor = uiState.backgroundColor,
         textColor = uiState.textColor,
         padding = uiState.padding,
+        showImage = uiState.showImage,
         cornerRadius = uiState.cornerRadius,
         tooltipWidth = uiState.tooltipWidth,
         tooltipText = uiState.tooltipText,
@@ -109,7 +110,7 @@ fun TooltipItem(
     if (targetElementId == id) {
         TooltipPopup(
             modifier = modifier,
-            tooltipPopupProperties = properties,
+            tooltipProperties = properties,
             anchor = { tooltipState ->
                 Button(shape = RoundedCornerShape(size = 4.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),

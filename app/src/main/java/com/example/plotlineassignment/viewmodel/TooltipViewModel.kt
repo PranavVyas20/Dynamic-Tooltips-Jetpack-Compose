@@ -4,8 +4,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import com.example.plotlineassignment.ui.screens.TooltipConfigScreenEvent
-import com.example.plotlineassignment.model.UIState
+import com.example.plotlineassignment.events.TooltipConfigScreenEvent
+import com.example.plotlineassignment.data.UIState
 import com.example.plotlineassignment.ui.components.TooltipAlignment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +17,7 @@ class TooltipViewModel : ViewModel() {
     val cornerRadiusRage = 1..10
     val arrowSizeRange = 8..18
     val availableAlignments = listOf("Top", "Bottom", "Start", "End")
+    val imageSelection = listOf("True" to true, "False" to false)
     val availableColors =
         listOf(
             "White" to Color.White,
@@ -39,6 +40,7 @@ class TooltipViewModel : ViewModel() {
             cornerRadius = 4.dp,
             tooltipWidth = 10.dp,
             arrowHeight = 10.dp,
+            showImage = false,
             arrowWidth = 10.dp
         )
     )
@@ -49,6 +51,7 @@ class TooltipViewModel : ViewModel() {
             targetElement = "btn-1",
             alignment = TooltipAlignment.TOP,
             textSize = 14.sp,
+            showImage = false,
             padding = 8.dp,
             tooltipText = "Tooltip text!",
             textColor = Color.White,
@@ -126,6 +129,10 @@ class TooltipViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(
                     alignment = event.alignment
                 )
+            }
+
+            is TooltipConfigScreenEvent.onShowImageToggleChaged -> {
+                _uiState.value = _uiState.value.copy(showImage = event.showImage)
             }
         }
     }
