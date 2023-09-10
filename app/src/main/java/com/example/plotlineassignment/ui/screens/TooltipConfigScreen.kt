@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.plotlineassignment.events.TooltipConfigScreenEvent
 import com.example.plotlineassignment.navigation.Destinations
 import com.example.plotlineassignment.ui.components.TooltipAlignment
 import com.example.plotlineassignment.viewmodel.TooltipViewModel
@@ -74,19 +75,40 @@ fun TooltipConfigScreen(viewModel: TooltipViewModel, navController: NavControlle
                     viewModel.onEvent(TooltipConfigScreenEvent.onTargetElementChanged(viewModel.targetElements[idx].second))
                 })
 
-            // FOR TOOLTIP ALIGNMENT
-            DropdownSelectionField(initialSelectedItem = viewModel.availableAlignments[0],
-                selectionsList = viewModel.availableAlignments,
-                title = "Tooltip Alignment",
-                id = "tooltip-alignment",
+            // FOR TOOLTIP ALIGNMENT AND IMAGE SELECTION
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                onItemSelect = { selectedTooltipAlignment, idx ->
-                    viewModel.onEvent(
-                        TooltipConfigScreenEvent.onTooltipAlignmentChanged(
-                            TooltipAlignment.get(selectedTooltipAlignment as String)!!
+                horizontalArrangement = Arrangement.spacedBy(28.dp)
+            ) {
+                DropdownSelectionField(initialSelectedItem = viewModel.availableAlignments[0],
+                    selectionsList = viewModel.availableAlignments,
+                    title = "Tooltip Alignment",
+                    id = "tooltip-alignment",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = { selectedTooltipAlignment, idx ->
+                        viewModel.onEvent(
+                            TooltipConfigScreenEvent.onTooltipAlignmentChanged(
+                                TooltipAlignment.get(selectedTooltipAlignment as String)!!
+                            )
                         )
-                    )
-                })
+                    }
+                )
+
+                DropdownSelectionField(initialSelectedItem = viewModel.imageSelection[1].first,
+                    selectionsList = listOf("True", "False"),
+                    title = "Contains Image",
+                    id = "contains-image",
+                    modifier = Modifier.weight(1f),
+                    onItemSelect = { selectedTooltipAlignment, idx ->
+                        viewModel.onEvent(
+                            TooltipConfigScreenEvent.onShowImageToggleChaged(
+                                showImage = viewModel.imageSelection[idx].second
+                            )
+                        )
+                    }
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(28.dp)
