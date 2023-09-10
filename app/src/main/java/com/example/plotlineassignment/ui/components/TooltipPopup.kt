@@ -1,6 +1,6 @@
 package com.example.plotlineassignment.ui.components
 
-import androidx.compose.foundation.background
+import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
@@ -8,172 +8,98 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import com.example.plotlineassignment.model.TooltipPopupProperties
-import com.example.plotlineassignment.ui.theme.DefaultDark
-import kotlin.math.absoluteValue
+import com.example.plotlineassignment.data.TooltipPopupProperties
+import com.example.plotlineassignment.provider.MyPopupPositionProvider
 
 @Composable
 fun TooltipPopup(
     modifier: Modifier,
-    tooltipPopupProperties: TooltipPopupProperties,
+    tooltipProperties: TooltipPopupProperties,
     anchor: @Composable (tooltipState: TooltipState) -> Unit,
     tooltipState: TooltipState,
-//    alignment: TooltipAlignment
 ) {
-    val density = LocalDensity.current
-    val config = LocalConfiguration.current
-
-    var tooltipContentSize by remember {
-        mutableStateOf(Pair(0.dp, 0.dp))
+    val view =  LocalView.current.rootView
+    var anchorOffsetPair by remember {
+        mutableStateOf(Offset(0f, 0f) to 0f)
     }
-    var offset by remember {
-        mutableStateOf(IntOffset(0, 0))
+    var arrowPositionOffset by remember {
+        mutableStateOf(Offset(0f, 0f))
     }
-    var anchorSpaceStart by remember {
-        mutableFloatStateOf(0f)
-    }
-    var anchorSpaceEnd by remember {
-        mutableFloatStateOf(0f)
-    }
-    var anchorSpaceTop by remember {
-        mutableFloatStateOf(0f)
-    }
-    var anchorSpaceBottom by remember {
-        mutableFloatStateOf(0f)
-    }
-
-    val screenWidth = remember {
-        with(density) { config.screenWidthDp.dp.toPx() }
-    }
-
-    var arrowAlignment by remember {
+    var calculatedAlignment by remember {
         mutableStateOf(TooltipAlignment.TOP)
     }
-
-    Box(modifier = modifier) {
-        Box(modifier = Modifier.onGloballyPositioned { coordinates ->
-            val buttonSize = coordinates.size
-            anchorSpaceStart = coordinates.positionInRoot().x
-            anchorSpaceEnd =
-                (screenWidth.dp.value - (anchorSpaceStart + buttonSize.width)).absoluteValue
-        }) {
-            anchor(tooltipState)
+    Box(modifier = modifier.onGloballyPositioned {
+        anchorOffsetPair = calculateTooltipPopupPosition(view, it)
+    }) {
+        val popupPositionProvider = remember(key1 = anchorOffsetPair) {
+            MyPopupPositionProvider(
+                alignment = tooltipProperties.alignment,
+                viewHeight = view.height,
+                arrowHeight = tooltipProperties.arrowHeight.value,
+                anchorCenterPosX = anchorOffsetPair.first.x,
+                centerPositionYWithStatusBar = anchorOffsetPair.second,
+                centerPositionYWithoutStatusBar = anchorOffsetPair.first.y,
+                onTooltipPosition = { tooltipPositionData ->
+                    arrowPositionOffset = tooltipPositionData.arrowPositionOffset
+                    calculatedAlignment = tooltipPositionData.alignment
+                },
+            )
         }
+        anchor(tooltipState)
         if (tooltipState.isVisible) {
             Popup(
-                onDismissRequest = { tooltipState.toggleVisibility() },
-                properties = PopupProperties(dismissOnClickOutside = true),
-                alignment = when (tooltipPopupProperties.alignment) {
-                    TooltipAlignment.TOP -> {
-                        arrowAlignment = TooltipAlignment.BOTTOM
-                        offset = IntOffset(x = 0, y = -tooltipContentSize.first.value.toInt())
-                        Alignment.TopCenter
-                    }
-
-                    TooltipAlignment.BOTTOM -> {
-                        arrowAlignment = TooltipAlignment.TOP
-                        offset = IntOffset(x = 0, y = tooltipContentSize.first.value.toInt())
-                        Alignment.BottomCenter
-                    }
-
-                    TooltipAlignment.START -> {
-                        if (anchorSpaceStart >= tooltipContentSize.second.value) {
-                            arrowAlignment = TooltipAlignment.END
-                            offset = IntOffset(x = -tooltipContentSize.second.value.toInt(), y = 0)
-                            Alignment.CenterStart
-                        }
-                        // If there is not enough space between anchor's start and the screen, try to show the tooltip on the anchor's end
-                        else {
-                            arrowAlignment = TooltipAlignment.START
-                            offset = IntOffset(x = tooltipContentSize.second.value.toInt(), y = 0)
-                            Alignment.CenterEnd
-                        }
-                    }
-
-                    TooltipAlignment.END -> {
-                        if (anchorSpaceEnd >= tooltipContentSize.second.value) {
-                            arrowAlignment = TooltipAlignment.START
-                            offset = IntOffset(x = tooltipContentSize.second.value.toInt(), y = 0)
-                            Alignment.CenterEnd
-                        }
-                        // If there is not enough space between anchor's end and the screen, try to show the tooltip on the anchor's start
-                        else {
-                            arrowAlignment = TooltipAlignment.END
-                            offset = IntOffset(x = -tooltipContentSize.second.value.toInt(), y = 0)
-                            Alignment.CenterStart
-                        }
-                    }
-                },
-                offset = offset
+                onDismissRequest = {tooltipState.toggleVisibility()},
+                popupPositionProvider = popupPositionProvider
             ) {
-                tooltipPopupProperties.let {
-                    Tooltip(
-                        text = it.tooltipText,
-                        textSize = it.textSize,
-                        textColor = it.textColor,
-                        backgroundColor = it.backgroundColor,
-                        cornerRadius = it.cornerRadius,
-                        padding = it.padding,
-                        arrowHeight = it.arrowHeight,
-                        arrowWidth = it.arrowWidth,
-                        arrowAlignment = arrowAlignment,
-                        modifier = Modifier.onGloballyPositioned { coordinates ->
-                            val height = coordinates.size.height.dp
-                            val width = coordinates.size.width.dp
-                            tooltipContentSize = height to width
-
-                        }
-                    )
-                }
+                BubbleLayout(
+                    alignment = calculatedAlignment,
+                    tooltipText = tooltipProperties.tooltipText,
+                    textSize = tooltipProperties.textSize,
+                    showImage = tooltipProperties.showImage,
+                    tooltipTextColor = tooltipProperties.textColor,
+                    arrowPositionOffset = arrowPositionOffset,
+                    tooltipPadding = tooltipProperties.padding,
+                    tooltipCornerRadius = tooltipProperties.cornerRadius,
+                    tooltipBackgroundColor = tooltipProperties.backgroundColor,
+                    arrowHeight = tooltipProperties.arrowHeight
+                )
             }
         }
     }
+
 }
 
-@Preview
-@Composable
-fun TooltipDemo() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        TooltipPopup(
-            modifier = Modifier,
-            tooltipState = rememberTooltipState(initiallyTooltipVisible = false),
-            tooltipPopupProperties = TooltipPopupProperties(
-                textColor = Color.White,
-                backgroundColor = DefaultDark,
-                cornerRadius = 4.dp,
-                arrowHeight = 10.dp,
-                arrowWidth = 10.dp,
-                alignment = TooltipAlignment.BOTTOM,
-                textSize = 18.sp,
-                tooltipText = "Tooltip",
-                tooltipWidth = 0.dp,
-                padding = 0.dp
-            ),
-            anchor = { tooltipState ->
-                Button(onClick = { tooltipState.toggleVisibility() }) {
-                    Text(text = "Button 1")
-                }
-            },
-        )
-    }
-}
+private fun calculateTooltipPopupPosition(
+    view: View,
+    coordinates: LayoutCoordinates?,
+): Pair<Offset, Float> {
+    coordinates ?: return Offset(0f, 0f) to 0f
+    val visibleWindowBounds = android.graphics.Rect()
+    view.getWindowVisibleDisplayFrame(visibleWindowBounds)
 
+    val boundsInWindow = coordinates.boundsInWindow()
+    val centerPositionX = boundsInWindow.right - (boundsInWindow.right - boundsInWindow.left) / 2
+    val height = boundsInWindow.bottom - boundsInWindow.top
+    val centerPositionYWithStatusBar = boundsInWindow.top + (height / 2)
+    val centerPositionYWithoutStatusBar = coordinates.positionInRoot().y + height / 2
+
+    return Offset(centerPositionX, centerPositionYWithoutStatusBar) to centerPositionYWithStatusBar
+}
+data class TooltipPositionData(
+    val alignment: TooltipAlignment,
+    val arrowPositionOffset: Offset
+)
 class TooltipState internal constructor(initialTooltipVisibility: Boolean) {
     private var isVisibleState by mutableStateOf(initialTooltipVisibility)
     val isVisible get() = isVisibleState
@@ -197,5 +123,32 @@ enum class TooltipAlignment(val key: String) {
 fun rememberTooltipState(initiallyTooltipVisible: Boolean): TooltipState {
     return remember {
         TooltipState(initiallyTooltipVisible)
+    }
+}
+@Preview
+@Composable
+fun TooltipPreview() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        TooltipPopup(
+            modifier = Modifier,
+            tooltipProperties = TooltipPopupProperties(
+                alignment = TooltipAlignment.START,
+                textSize = 14.sp,
+                textColor = Color.White,
+                backgroundColor = Color.Black,
+                padding = 8.dp,
+                cornerRadius = 6.dp,
+                arrowHeight = 25.dp,
+                showImage = false,
+                tooltipText = "Some long  sldjfsdgsdgsdg \n sdifljs \n sdfsldjf"
+
+            ),
+            anchor = { tooltipState ->
+                Button(onClick = { tooltipState.toggleVisibility() }) {
+                    Text("Button")
+                }
+            },
+            tooltipState = rememberTooltipState(initiallyTooltipVisible = false)
+        )
     }
 }
